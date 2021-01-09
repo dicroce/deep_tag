@@ -245,7 +245,7 @@ void MainWindow::on_new_dataset_clicked()
     QString dir = QFileDialog::getExistingDirectory(
         this,
         tr("Create Dataset Directory"),
-        "/home",
+        "/home", /// XXX PORTABILITY
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if(!dir.isEmpty())
@@ -256,8 +256,8 @@ void MainWindow::on_new_dataset_clicked()
 
         _find_child<QWidget>("container")->setEnabled(false);
 
-        _annotation_path = (dir + "/annotations").toStdString();
-        _image_path = (dir + "/images").toStdString();
+        _annotation_path = (dir + "/annotations").toStdString(); /// XXX PORTABILITY
+        _image_path = (dir + "/images").toStdString(); /// XXX PORTABILITY
         _cfg_path = dir.toStdString();
 
         _write_cfg(dir.toStdString());
@@ -271,7 +271,7 @@ void MainWindow::on_open_dataset_clicked()
     QString dir = QFileDialog::getExistingDirectory(
         this,
         tr("Open Dataset Directory"),
-        "/home",
+        "/home", /// XXX PORTABILITY
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if(!dir.isEmpty())
@@ -284,7 +284,7 @@ void MainWindow::on_open_dataset_clicked()
 
         _cfg_path = dir.toStdString();
 
-        _read_cfg(dir.toStdString() + "/deep_tag.cfg");
+        _read_cfg(dir.toStdString() + "/deep_tag.cfg"); /// XXX PORTABILITY
 
         _widgets.dataset_path->setText(QString::fromStdString(_cfg_path));
 
@@ -297,7 +297,7 @@ void MainWindow::on_open_dataset_clicked()
 void MainWindow::on_open_video_button_clicked()
 {
     auto fileName = QFileDialog::getOpenFileName(
-        this, tr("Open Video File"), "/home", tr("MP4 (*.mp4);; AVI (*.avi)")
+        this, tr("Open Video File"), "/home", tr("MP4 (*.mp4);; AVI (*.avi)") /// XXX PORTABILITY
     );
 
     // Open our video file...
@@ -899,11 +899,11 @@ void MainWindow::_write_cfg(const std::string& ds_path)
     if(!QDir(top_level_dir).exists())
         QDir::root().mkpath(top_level_dir);
 
-    auto images_dir = top_level_dir + "/images/";
+    auto images_dir = top_level_dir + "/images/"; /// XXX PORTABILITY
     if(!QDir(images_dir).exists())
         QDir::root().mkpath(images_dir);
 
-    auto annotations_dir = top_level_dir + "/annotations/";
+    auto annotations_dir = top_level_dir + "/annotations/"; /// XXX PORTABILITY
     if(!QDir(annotations_dir).exists())
         QDir::root().mkpath(annotations_dir);
 
@@ -919,7 +919,7 @@ void MainWindow::_write_cfg(const std::string& ds_path)
     cfg_content += "] }";
 
 
-    QFile file(top_level_dir + "/deep_tag.cfg");
+    QFile file(top_level_dir + "/deep_tag.cfg"); /// XXX PORTABILITY
 
     if(file.open(QIODevice::ReadWrite))
     {
@@ -961,7 +961,7 @@ void MainWindow::_write_annotation(const std::string& base_name)
         int height = frame.rows;
 
         // write our image...
-        cv::imwrite(_image_path + "/" + base_name + ".jpg", frame);
+        cv::imwrite(_image_path + "/" + base_name + ".jpg", frame); /// XXX PORTABILITY
 
         std::string objects;
         for(auto i = _rects.rects.begin(), e = _rects.rects.end(); i!=e; ++i)
@@ -1010,7 +1010,7 @@ void MainWindow::_write_annotation(const std::string& base_name)
                                                    QString::number(height),
                                                    QString::fromStdString(objects));
 
-        QFile annotation_file(QString::fromStdString(_annotation_path + "/" + base_name + ".xml"));
+        QFile annotation_file(QString::fromStdString(_annotation_path + "/" + base_name + ".xml")); /// XXX PORTABILITY
 
         if(annotation_file.open(QIODevice::WriteOnly))
         {
