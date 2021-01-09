@@ -17,6 +17,7 @@
 #include <QDir>
 #include <QUuid>
 #include <QSound>
+#include <QStandardPaths>
 
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -25,11 +26,9 @@
 #include <stdexcept>
 #include <cmath>
 
-// - Add keyboard shortcuts
 // - Create deep_tag icon
-// - Add UI element to show the current number of annotations
-// - Write annotation function that outputs 1 image and N annotations per click of annotate button.
-// - Add keyboard shortcuts to everything.
+// - Cancel on new rect dialog should not create rect
+// - Add shift click keyboard shortcuts for fractional box movement and scaling.
 
 using namespace cv;
 using namespace std;
@@ -245,7 +244,7 @@ void MainWindow::on_new_dataset_clicked()
     QString dir = QFileDialog::getExistingDirectory(
         this,
         tr("Create Dataset Directory"),
-        "/home", /// XXX PORTABILITY
+        QDir::homePath(),
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if(!dir.isEmpty())
@@ -256,8 +255,8 @@ void MainWindow::on_new_dataset_clicked()
 
         _find_child<QWidget>("container")->setEnabled(false);
 
-        _annotation_path = (dir + "/annotations").toStdString(); /// XXX PORTABILITY
-        _image_path = (dir + "/images").toStdString(); /// XXX PORTABILITY
+        _annotation_path = (dir + QDir::separator() + "annotations").toStdString();
+        _image_path = (dir + QDir::separator() + "images").toStdString();
         _cfg_path = dir.toStdString();
 
         _write_cfg(dir.toStdString());
@@ -271,7 +270,7 @@ void MainWindow::on_open_dataset_clicked()
     QString dir = QFileDialog::getExistingDirectory(
         this,
         tr("Open Dataset Directory"),
-        "/home", /// XXX PORTABILITY
+        QDir::homePath(),
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if(!dir.isEmpty())
@@ -284,7 +283,7 @@ void MainWindow::on_open_dataset_clicked()
 
         _cfg_path = dir.toStdString();
 
-        _read_cfg(dir.toStdString() + "/deep_tag.cfg"); /// XXX PORTABILITY
+        _read_cfg((dir + QDir::separator() + "deep_tag.cfg").toStdString());
 
         _widgets.dataset_path->setText(QString::fromStdString(_cfg_path));
 
@@ -297,7 +296,7 @@ void MainWindow::on_open_dataset_clicked()
 void MainWindow::on_open_video_button_clicked()
 {
     auto fileName = QFileDialog::getOpenFileName(
-        this, tr("Open Video File"), "/home", tr("MP4 (*.mp4);; AVI (*.avi)") /// XXX PORTABILITY
+        this, tr("Open Video File"), QDir::homePath(), tr("MP4 (*.mp4);; AVI (*.avi)")
     );
 
     // Open our video file...
@@ -501,6 +500,8 @@ void MainWindow::tag_pressed()
     QSound::play(":/sounds/shutter.wav");
 
     _write_annotation(QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString());
+
+    on_next_frame_clicked();
 }
 
 void MainWindow::grow_selected_rect()
@@ -512,6 +513,7 @@ void MainWindow::grow_selected_rect()
         r.y -= 0.01;
         r.w += 0.02;
         r.h += 0.02;
+        r.tracker_initialized = false;
         _rects.rects[_rects.selected_key] = r;
 
         _render_frame();
@@ -524,6 +526,7 @@ void MainWindow::up_selected_rect()
     {
         auto r = _rects.rects[_rects.selected_key];
         r.y -= 0.01;
+        r.tracker_initialized = false;
         _rects.rects[_rects.selected_key] = r;
 
         _render_frame();
@@ -536,6 +539,7 @@ void MainWindow::down_selected_rect()
     {
         auto r = _rects.rects[_rects.selected_key];
         r.y += 0.01;
+        r.tracker_initialized = false;
         _rects.rects[_rects.selected_key] = r;
 
         _render_frame();
@@ -548,6 +552,7 @@ void MainWindow::left_selected_rect()
     {
         auto r = _rects.rects[_rects.selected_key];
         r.x -= 0.01;
+        r.tracker_initialized = false;
         _rects.rects[_rects.selected_key] = r;
 
         _render_frame();
@@ -560,6 +565,7 @@ void MainWindow::right_selected_rect()
     {
         auto r = _rects.rects[_rects.selected_key];
         r.x += 0.01;
+        r.tracker_initialized = false;
         _rects.rects[_rects.selected_key] = r;
 
         _render_frame();
@@ -575,6 +581,7 @@ void MainWindow::shrink_selected_rect()
         r.y += 0.01;
         r.w -= 0.02;
         r.h -= 0.02;
+        r.tracker_initialized = false;
         _rects.rects[_rects.selected_key] = r;
 
         _render_frame();
@@ -899,11 +906,11 @@ void MainWindow::_write_cfg(const std::string& ds_path)
     if(!QDir(top_level_dir).exists())
         QDir::root().mkpath(top_level_dir);
 
-    auto images_dir = top_level_dir + "/images/"; /// XXX PORTABILITY
+    auto images_dir = top_level_dir + QDir::separator() + "images";
     if(!QDir(images_dir).exists())
         QDir::root().mkpath(images_dir);
 
-    auto annotations_dir = top_level_dir + "/annotations/"; /// XXX PORTABILITY
+    auto annotations_dir = top_level_dir + QDir::separator() + "annotations";
     if(!QDir(annotations_dir).exists())
         QDir::root().mkpath(annotations_dir);
 
@@ -919,7 +926,7 @@ void MainWindow::_write_cfg(const std::string& ds_path)
     cfg_content += "] }";
 
 
-    QFile file(top_level_dir + "/deep_tag.cfg"); /// XXX PORTABILITY
+    QFile file(top_level_dir + QDir::separator() + "deep_tag.cfg");
 
     if(file.open(QIODevice::ReadWrite))
     {
@@ -961,7 +968,7 @@ void MainWindow::_write_annotation(const std::string& base_name)
         int height = frame.rows;
 
         // write our image...
-        cv::imwrite(_image_path + "/" + base_name + ".jpg", frame); /// XXX PORTABILITY
+        cv::imwrite(_image_path + QString(QDir::separator()).toStdString() + base_name + ".jpg", frame);
 
         std::string objects;
         for(auto i = _rects.rects.begin(), e = _rects.rects.end(); i!=e; ++i)
@@ -1010,7 +1017,7 @@ void MainWindow::_write_annotation(const std::string& base_name)
                                                    QString::number(height),
                                                    QString::fromStdString(objects));
 
-        QFile annotation_file(QString::fromStdString(_annotation_path + "/" + base_name + ".xml")); /// XXX PORTABILITY
+        QFile annotation_file(QString::fromStdString(_annotation_path + QString(QDir::separator()).toStdString() + base_name + ".xml"));
 
         if(annotation_file.open(QIODevice::WriteOnly))
         {
