@@ -1,0 +1,4 @@
+
+1) Should go ahead and build debug opencv then point to different ones in cmakelists
+2) release build line looks like cmake --build . --config Release
+
