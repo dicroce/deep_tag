@@ -1,0 +1,11 @@
+
+1) Should go ahead and build debug opencv then point to different ones in cmakelists
+2) release build line looks like cmake --build . --config Release
+
+Qt Deployment
+
+Windows
+    /c/Qt5/5.15.2/msvc2019_64/bin/windeployqt.exe /c/dev/deep_tag/build/Release/deep_tag.exe
+
+Linux
+    cqtdeployer -qmake `which qmake` -bin build/deep_tag
