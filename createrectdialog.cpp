@@ -3,7 +3,8 @@
 
 CreateRectDialog::CreateRectDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::CreateRectDialog)
+    ui(new Ui::CreateRectDialog),
+    _accepted(false)
 {
     ui->setupUi(this);
 }

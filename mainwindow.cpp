@@ -18,6 +18,7 @@
 #include <QUuid>
 #include <QSound>
 #include <QStandardPaths>
+#include <QDialogButtonBox>
 
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -406,6 +407,9 @@ void MainWindow::on_create_rect_button_clicked()
 
         crd->exec();
 
+        if(crd->accepted())
+        {
+
         auto tar = crd->findChild<QCheckBox*>("tracking_auto_resize");
 
         if(!tar)
@@ -433,6 +437,7 @@ void MainWindow::on_create_rect_button_clicked()
         _rects.rects.insert(make_pair(key, ri));
         _rects.selected_key = key;
         ++_nextRectKey;
+        }
 
         delete crd;
     }
