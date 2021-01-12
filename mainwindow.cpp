@@ -502,6 +502,8 @@ void MainWindow::tag_pressed()
     _write_annotation(QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString());
 
     on_next_frame_clicked();
+
+    _update_ui();
 }
 
 void MainWindow::grow_selected_rect()
