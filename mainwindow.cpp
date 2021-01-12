@@ -27,8 +27,14 @@
 #include <stdexcept>
 #include <cmath>
 
+// - Linux packaging
+//   - make install
+// - Windows installer
 // - Create deep_tag icon
-// - Cancel on new rect dialog should not create rect
+// - Add help
+// - Make demo youtube video.
+// - Update github page.
+// - Do final 1.0 windows & linux builds
 // - Add shift click keyboard shortcuts for fractional box movement and scaling.
 
 using namespace cv;
@@ -300,15 +306,18 @@ void MainWindow::on_open_video_button_clicked()
         this, tr("Open Video File"), QDir::homePath(), tr("MP4 (*.mp4);; AVI (*.avi)")
     );
 
-    // Open our video file...
-    _current_clip = make_unique<VideoCapture>(fileName.toStdString());
-    _current_frame_index = 0;
+    if(!fileName.isEmpty())
+    {
+        // Open our video file...
+        _current_clip = make_unique<VideoCapture>(fileName.toStdString());
+        _current_frame_index = 0;
 
-    // Set our timeline slider maximum to the index of the last frame in the clip.
-    _widgets.timeline_slider->setMaximum(_num_frames_in_clip(_current_clip) - 1);
+        // Set our timeline slider maximum to the index of the last frame in the clip.
+        _widgets.timeline_slider->setMaximum(_num_frames_in_clip(_current_clip) - 1);
 
-    // Redraw
-    _render_frame();
+        // Redraw
+        _render_frame();
+    }
 }
 
 void MainWindow::on_resize_done()

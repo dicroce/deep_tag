@@ -3,3 +3,5 @@ build/
 pro_files/build-deep_tag-Desktop_Qt_5_15_2_MSVC2019_64bit-Debug/
 .vscode/settings.json
 pro_files/deep_tag/deep_tag.pro.user
+Output/
+
