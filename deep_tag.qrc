@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/images">
         <file>left_arrow.png</file>
+        <file>dt.png</file>
+        <file>arrow-left.svg</file>
+        <file>arrow-right.svg</file>
     </qresource>
     <qresource prefix="/sounds">
         <file>shutter.wav</file>

@@ -28,7 +28,7 @@
     </font>
    </property>
    <property name="text">
-    <string>DeepTag</string>
+    <string>deep_tag</string>
    </property>
   </widget>
   <widget class="QPushButton" name="create_new_dataset">

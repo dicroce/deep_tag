@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>deep_tag</string>
   </property>
   <widget class="QWidget" name="container">
    <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -456,18 +456,7 @@
                           </property>
                           <property name="icon">
                            <iconset resource="deep_tag.qrc">
-                            <normaloff>:/images/left_arrow.png</normaloff>:/images/left_arrow.png</iconset>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QPushButton" name="pushButton_5">
-                          <property name="text">
-                           <string/>
-                          </property>
-                          <property name="icon">
-                           <iconset resource="deep_tag.qrc">
-                            <normaloff>:/images/left_arrow.png</normaloff>:/images/left_arrow.png</iconset>
+                            <normaloff>:/images/arrow-left.svg</normaloff>:/images/arrow-left.svg</iconset>
                           </property>
                          </widget>
                         </item>
@@ -478,7 +467,7 @@
                           </property>
                           <property name="icon">
                            <iconset resource="deep_tag.qrc">
-                            <normaloff>:/images/left_arrow.png</normaloff>:/images/left_arrow.png</iconset>
+                            <normaloff>:/images/arrow-right.svg</normaloff>:/images/arrow-right.svg</iconset>
                           </property>
                          </widget>
                         </item>
@@ -669,7 +658,7 @@
      <x>0</x>
      <y>0</y>
      <width>1108</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

@@ -27,9 +27,12 @@
 #include <stdexcept>
 #include <cmath>
 
+// - Add horizontal increase / decrease shortcuts   (', ;)
+// - Add vertical increase / decrease shortcuts     (/, ,)
+// - Find next and prev frame arrow icons
+// - Get rid of play button
 // - Linux packaging
 //   - make install
-// - Windows installer
 // - Create deep_tag icon
 // - Add help
 // - Make demo youtube video.
@@ -57,6 +60,8 @@ MainWindow::MainWindow(QWidget *parent)
     , _cfg_path()
 {
     ui->setupUi(this);
+
+    setWindowIcon(QIcon(":/images/dt.png"));
 
     // We only want to do a real resize after the user is done reconfiguring the
     // window so set a timer here.
@@ -409,10 +414,10 @@ void MainWindow::on_create_rect_button_clicked()
         if(!tcb)
             throw std::runtime_error("Unable to find tracking_combo_box");
 
-        tcb->addItem(QString::fromStdString(_tracking_algorithm_to_name(tracking_algorithm::TA_NONE)));
+        tcb->addItem(QString::fromStdString(_tracking_algorithm_to_name(tracking_algorithm::TA_CSRT)));
         tcb->addItem(QString::fromStdString(_tracking_algorithm_to_name(tracking_algorithm::TA_MIL)));
         tcb->addItem(QString::fromStdString(_tracking_algorithm_to_name(tracking_algorithm::TA_KCF)));
-        tcb->addItem(QString::fromStdString(_tracking_algorithm_to_name(tracking_algorithm::TA_CSRT)));
+        tcb->addItem(QString::fromStdString(_tracking_algorithm_to_name(tracking_algorithm::TA_NONE)));
 
         crd->exec();
 
@@ -922,11 +927,11 @@ void MainWindow::_write_cfg(const std::string& ds_path)
     if(!QDir(top_level_dir).exists())
         QDir::root().mkpath(top_level_dir);
 
-    auto images_dir = top_level_dir + QDir::separator() + "images";
+    auto images_dir = top_level_dir + "/" + "images";
     if(!QDir(images_dir).exists())
         QDir::root().mkpath(images_dir);
 
-    auto annotations_dir = top_level_dir + QDir::separator() + "annotations";
+    auto annotations_dir = top_level_dir + "/" + "annotations";
     if(!QDir(annotations_dir).exists())
         QDir::root().mkpath(annotations_dir);
 
