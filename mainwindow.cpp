@@ -29,11 +29,8 @@
 
 // - Add horizontal increase / decrease shortcuts   (', ;)
 // - Add vertical increase / decrease shortcuts     (/, ,)
-// - Find next and prev frame arrow icons
-// - Get rid of play button
 // - Linux packaging
 //   - make install
-// - Create deep_tag icon
 // - Add help
 // - Make demo youtube video.
 // - Update github page.
