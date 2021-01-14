@@ -119,7 +119,7 @@ private slots:
 
     void on_destroy_rect_button_clicked();
 
-    void on_rect_list_clicked(QListWidgetItem* item);
+    void on_rect_list_clicked(QListWidgetItem*);
 
     void show_startup_dialog();
 
@@ -133,6 +133,14 @@ private slots:
     void left_selected_rect();
     void right_selected_rect();
 
+    void shrink_vertical_selected_rect();
+    void grow_vertical_selected_rect();
+
+    void shrink_horizontal_selected_rect();
+    void grow_horizontal_selected_rect();
+
+    void next_selected();
+
 private:
     void _update_ui();
     void _render_frame();
@@ -142,7 +150,7 @@ private:
     std::string _tracking_algorithm_to_name(tracking_algorithm algo) const;
     tracking_algorithm _name_to_tracking_algorithm(const std::string& name) const;
 
-    drag_kind _is_drag_start(const rect_info& ri, double x, double y, int stage_width, int stage_height);
+    drag_kind _is_drag_start(const rect_info& ri, double x, double y);
     void _drag_update_rect(rect_info& r);
 
     void _update_status();

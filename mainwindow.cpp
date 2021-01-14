@@ -27,8 +27,6 @@
 #include <stdexcept>
 #include <cmath>
 
-// - Add horizontal increase / decrease shortcuts   (', ;)
-// - Add vertical increase / decrease shortcuts     (/, ,)
 // - Linux packaging
 //   - make install
 // - Add help
@@ -99,6 +97,13 @@ MainWindow::MainWindow(QWidget *parent)
     new QShortcut(QKeySequence(Qt::Key_S), this, SLOT(down_selected_rect()));
     new QShortcut(QKeySequence(Qt::Key_A), this, SLOT(left_selected_rect()));
     new QShortcut(QKeySequence(Qt::Key_D), this, SLOT(right_selected_rect()));
+
+    new QShortcut(QKeySequence(Qt::Key_Apostrophe), this, SLOT(grow_vertical_selected_rect()));
+    new QShortcut(QKeySequence(Qt::Key_Semicolon), this, SLOT(shrink_vertical_selected_rect()));
+    new QShortcut(QKeySequence(Qt::Key_Slash), this, SLOT(grow_horizontal_selected_rect()));
+    new QShortcut(QKeySequence(Qt::Key_Period), this, SLOT(shrink_horizontal_selected_rect()));
+
+    new QShortcut(QKeySequence(Qt::Key_Tab), this, SLOT(next_selected()));
 }
 
 MainWindow::~MainWindow()
@@ -116,8 +121,16 @@ void MainWindow::resizeEvent(QResizeEvent* e)
     QWidget::resizeEvent(e);
 }
 
+double distance(double x1, double y1, double x2, double y2)
+{
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2) * 1.0);
+}
+
 bool MainWindow::eventFilter(QObject*, QEvent* event)
 {
+    if(!_current_clip)
+        return false;
+
     auto evt_type = event->type();
 
     if(evt_type == QEvent::MouseButtonPress ||
@@ -140,47 +153,78 @@ bool MainWindow::eventFilter(QObject*, QEvent* event)
             {
                 if(!_drag.dragging)
                 {
-                    for(auto i = _rects.rects.begin(), e = _rects.rects.end(); i != e; )
+                    // First find which rect the click belongs to...
+
+                    auto closest_rect = _rects.rects.begin();
+                    double smallest_delta = 1.0;
+                    for(auto i = closest_rect, e = _rects.rects.end(); i != e; ++i)
                     {
-                        auto dk = _is_drag_start(i->second, x, y, stage_width, stage_height);
+                        auto x1 = i->second.x;
+                        auto y1 = i->second.y;
+                        auto x2 = x1 + i->second.w;
+                        auto y2 = y1 + i->second.h;
 
-                        if(dk == DK_NONE)
-                            ++i;
-                        else
+                        auto d_tl = distance(x, y, x1, y1);
+                        auto d_tr = distance(x, y, x2, y1);
+                        auto d_br = distance(x, y, x2, y2);
+                        auto d_bl = distance(x, y, x1, y2);
+
+                        if(d_tl < smallest_delta)
                         {
-                            _drag.dragging = true;
-                            _drag.rect_key = i->first;
-                            _drag.kind = dk;
-                            _drag.start_mouse_x = x;
-                            _drag.start_mouse_y = y;
-                            _drag.last_mouse_x = x;
-                            _drag.last_mouse_y = y;
+                            closest_rect = i;
+                            smallest_delta = d_tl;
+                        }
+                        if(d_tr < smallest_delta)
+                        {
+                            closest_rect = i;
+                            smallest_delta = d_tr;
+                        }
+                        if(d_br < smallest_delta)
+                        {
+                            closest_rect = i;
+                            smallest_delta = d_br;
+                        }
+                        if(d_bl < smallest_delta)
+                        {
+                            closest_rect = i;
+                            smallest_delta = d_bl;
+                        }
+                    }
 
-                            _rects.selected_key = i->first;
+                    auto dk = _is_drag_start(closest_rect->second, x, y);
 
-                            // Re-intialize the tracker....
-                            if(!i->second.tracker.empty())
+                    if(dk != DK_NONE)
+                    {
+                        _drag.dragging = true;
+                        _drag.rect_key = closest_rect->first;
+                        _drag.kind = dk;
+                        _drag.start_mouse_x = x;
+                        _drag.start_mouse_y = y;
+                        _drag.last_mouse_x = x;
+                        _drag.last_mouse_y = y;
+
+                        _rects.selected_key = closest_rect->first;
+
+                        // Re-intialize the tracker....
+                        if(!closest_rect->second.tracker.empty())
+                        {
+                            if(closest_rect->second.tracking == TA_KCF)
+                                closest_rect->second.tracker = TrackerKCF::create();
+                            else if(closest_rect->second.tracking == TA_MIL)
+                                closest_rect->second.tracker = TrackerMIL::create();
+                            else if(closest_rect->second.tracking == TA_CSRT)
+                                closest_rect->second.tracker = TrackerCSRT::create();
+                            closest_rect->second.tracker_initialized = false;
+                        }
+
+                        // Update the selected item in the rects ui list.
+                        for(int i = 0; i < _widgets.rects_list->count(); ++i)
+                        {
+                            if(_widgets.rects_list->item(i)->text().toStdString() == _rects.selected_key)
                             {
-                                if(i->second.tracking == TA_KCF)
-                                    i->second.tracker = TrackerKCF::create();
-                                else if(i->second.tracking == TA_MIL)
-                                    i->second.tracker = TrackerMIL::create();
-                                else if(i->second.tracking == TA_CSRT)
-                                    i->second.tracker = TrackerCSRT::create();
-                                i->second.tracker_initialized = false;
+                                _widgets.rects_list->setCurrentRow(i);
+                                _update_status();
                             }
-
-                            // Update the selected item in the rects ui list.
-                            for(int i = 0; i < _widgets.rects_list->count(); ++i)
-                            {
-                                if(_widgets.rects_list->item(i)->text().toStdString() == _rects.selected_key)
-                                {
-                                    _widgets.rects_list->setCurrentRow(i);
-                                    _update_status();
-                                }
-                            }
-
-                            i = e;
                         }
                     }
                 }
@@ -188,12 +232,7 @@ bool MainWindow::eventFilter(QObject*, QEvent* event)
             else if(evt_type == QEvent::MouseButtonRelease)
             {
                 if(_drag.dragging)
-                {
                     _render_frame();
-
-                    printf("drag ending.\n");
-                    fflush(stdout);
-                }
                 _drag.dragging = false;
                 _drag.kind = DK_NONE;
             }
@@ -420,34 +459,33 @@ void MainWindow::on_create_rect_button_clicked()
 
         if(crd->accepted())
         {
+            auto tar = crd->findChild<QCheckBox*>("tracking_auto_resize");
 
-        auto tar = crd->findChild<QCheckBox*>("tracking_auto_resize");
+            if(!tar)
+                throw std::runtime_error("Unable to find tracking_auto_resize");
 
-        if(!tar)
-            throw std::runtime_error("Unable to find tracking_auto_resize");
+            rect_info ri;
 
-        rect_info ri;
+            ri.class_name = ccb->currentText().toStdString();
+            ri.x = ri.y = 0.10;
+            ri.w = ri.h = 0.25;
+            ri.tracking = _name_to_tracking_algorithm(tcb->currentText().toStdString());
+            ri.tracking_auto_resize = (tar->checkState() == Qt::Checked) ? true : false;
 
-        ri.class_name = ccb->currentText().toStdString();
-        ri.x = ri.y = 0.10;
-        ri.w = ri.h = 0.25;
-        ri.tracking = _name_to_tracking_algorithm(tcb->currentText().toStdString());
-        ri.tracking_auto_resize = (tar->checkState() == Qt::Checked) ? true : false;
+            if(ri.tracking == TA_KCF)
+                ri.tracker = TrackerKCF::create();
+            else if(ri.tracking == TA_MIL)
+                ri.tracker = TrackerMIL::create();
+            else if(ri.tracking == TA_CSRT)
+                ri.tracker = TrackerCSRT::create();
 
-        if(ri.tracking == TA_KCF)
-            ri.tracker = TrackerKCF::create();
-        else if(ri.tracking == TA_MIL)
-            ri.tracker = TrackerMIL::create();
-        else if(ri.tracking == TA_CSRT)
-            ri.tracker = TrackerCSRT::create();
+            ri.tracker_initialized = false;
 
-        ri.tracker_initialized = false;
-
-        // rects are inserted under incrementing numeric key...
-        auto key = to_string(_nextRectKey);
-        _rects.rects.insert(make_pair(key, ri));
-        _rects.selected_key = key;
-        ++_nextRectKey;
+            // rects are inserted under incrementing numeric key...
+            auto key = to_string(_nextRectKey);
+            _rects.rects.insert(make_pair(key, ri));
+            _rects.selected_key = key;
+            ++_nextRectKey;
         }
 
         delete crd;
@@ -478,7 +516,7 @@ void MainWindow::on_destroy_rect_button_clicked()
     }
 }
 
-void MainWindow::on_rect_list_clicked(QListWidgetItem* item)
+void MainWindow::on_rect_list_clicked(QListWidgetItem*)
 {
     auto selected = _widgets.rects_list->selectedItems();
 
@@ -606,6 +644,78 @@ void MainWindow::shrink_selected_rect()
     }
 }
 
+void MainWindow::shrink_vertical_selected_rect()
+{
+    if(!_rects.selected_key.empty())
+    {
+        auto r = _rects.rects[_rects.selected_key];
+        r.y += 0.01;
+        r.h -= 0.02;
+        r.tracker_initialized = false;
+        _rects.rects[_rects.selected_key] = r;
+
+        _render_frame();
+    }
+}
+
+void MainWindow::grow_vertical_selected_rect()
+{
+    if(!_rects.selected_key.empty())
+    {
+        auto r = _rects.rects[_rects.selected_key];
+        r.y -= 0.01;
+        r.h += 0.02;
+        r.tracker_initialized = false;
+        _rects.rects[_rects.selected_key] = r;
+
+        _render_frame();
+    }
+}
+
+void MainWindow::shrink_horizontal_selected_rect()
+{
+    if(!_rects.selected_key.empty())
+    {
+        auto r = _rects.rects[_rects.selected_key];
+        r.x += 0.01;
+        r.w -= 0.02;
+        r.tracker_initialized = false;
+        _rects.rects[_rects.selected_key] = r;
+
+        _render_frame();
+    }
+}
+
+void MainWindow::grow_horizontal_selected_rect()
+{
+    if(!_rects.selected_key.empty())
+    {
+        auto r = _rects.rects[_rects.selected_key];
+        r.x -= 0.01;
+        r.w += 0.02;
+        r.tracker_initialized = false;
+        _rects.rects[_rects.selected_key] = r;
+
+        _render_frame();
+    }
+}
+
+void MainWindow::next_selected()
+{
+    if(!_rects.selected_key.empty())
+    {
+        auto found = _rects.rects.find(_rects.selected_key);
+
+        ++found;
+        if(found == _rects.rects.end())
+            found = _rects.rects.begin();
+
+        _rects.selected_key = found->first;
+
+        _render_frame();
+    }
+}
+
 void MainWindow::_update_ui()
 {
     // Update the UI rects_list to match the rect_info list.
@@ -639,7 +749,7 @@ void MainWindow::_render_frame()
         // Resize our frame into the current size of the QLabel we render into...
         cv::resize(frame, frame, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
 
-        auto pixmap = QPixmap::fromImage(QImage(frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888));
+        auto pixmap = QPixmap::fromImage(QImage(frame.data, frame.cols, frame.rows, (int)frame.step, QImage::Format_RGB888));
 
         for(auto r: _rects.rects)
         {
@@ -737,12 +847,7 @@ tracking_algorithm MainWindow::_name_to_tracking_algorithm(const string& name) c
     else return tracking_algorithm::TA_CSRT;
 }
 
-double distance(double x1, double y1, double x2, double y2)
-{
-   return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2) * 1.0);
-}
-
-drag_kind MainWindow::_is_drag_start(const rect_info& ri, double x, double y, int stage_width, int stage_height)
+drag_kind MainWindow::_is_drag_start(const rect_info& ri, double x, double y)
 {
     auto tl_d = distance(x, y, ri.x, ri.y);
     auto tr_d = distance(x, y, ri.x + ri.w, ri.y);
@@ -843,7 +948,7 @@ void MainWindow::_track_rects()
         // Resize our frame into the current size of the QLabel we render into...
         cv::resize(frame, frame, cv::Size(w, h), 0, 0, cv::INTER_CUBIC);
 
-        auto pixmap = QPixmap::fromImage(QImage(frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888));
+        auto pixmap = QPixmap::fromImage(QImage(frame.data, frame.cols, frame.rows, (int)frame.step, QImage::Format_RGB888));
 
         for(int i = 0; i < _widgets.rects_list->count(); ++i)
         {

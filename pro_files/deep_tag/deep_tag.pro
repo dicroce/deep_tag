@@ -2,7 +2,7 @@ QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++14
+CONFIG += c++14 console
 
 INCLUDEPATH += ../../opencv/windows/vc16/debug/include
 
