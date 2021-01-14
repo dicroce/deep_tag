@@ -33,11 +33,13 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\dev\deep_tag\build\INSTALL_ROOT\bin\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs 
+Source: "C:\dev\deep_tag\build\INSTALL_ROOT\bin\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "C:\dev\deep_tag\VC_redist.x64.exe"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
+Filename: "{app}\VC_redist.x64.exe"; Parameters: "/passive /silent /norestart"; WorkingDir: {app}; Flags: runminimized nowait; StatusMsg: Installing CRT...
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

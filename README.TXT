@@ -9,8 +9,8 @@ Linux (Ubuntu)
     git clone https://github.com/dicroce/deep_tag
     mkdir deep_tag/build
     pushd deep_tag/build
-    cmake ..
-    cmake --build .
+    cmake -DCMAKE_BUILD_TYPE=Debug ..
+    cmake --build . --config Debug
     sudo make install        # everything is installed to /usr/local/deep_tag
 
 Windows
@@ -28,9 +28,9 @@ Windows
         git clone https://github.com/dicroce/deep_tag
         mkdir deep_tag/build
         pushd deep_tag/build
-        cmake ..
-        cmake --build .
-        cmake --build . --target install
+        cmake -DCMAKE_BUILD_TYPE=Debug ..
+        cmake --build . --config Debug
+        cmake --build . --config Debug --target install
 
     At this point your build directory should contain an INSTALL_ROOT directory. deep_tag can run
     from this folder (and you should be able to move the folder wherever you'd like). At this point
@@ -38,5 +38,4 @@ Windows
     a deep_tag_setup.exe.
 
 Release Builds
-    Modigy the "cmake --build ." line in the above instructions to be:
-        "cmake --build . --config Release"
+    Change "Debug" to "Release" in the above steps.
