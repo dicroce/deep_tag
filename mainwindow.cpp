@@ -19,6 +19,7 @@
 #include <QSound>
 #include <QStandardPaths>
 #include <QDialogButtonBox>
+#include <QTextStream>
 
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -1054,7 +1055,8 @@ void MainWindow::_write_cfg(const std::string& ds_path)
     if(file.open(QIODevice::ReadWrite))
     {
         QTextStream stream(&file);
-        stream << cfg_content << Qt::endl;
+        stream << cfg_content << '\n';
+	stream.flush();
     }
 }
 
