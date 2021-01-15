@@ -21,3 +21,4 @@ Keyboard Shortcuts
     tab          - Cycle between rectangles.
     ', ;         - Vertically increase or decrease the size of the current rectangle.
     ,, .         - Horizontally increase or decrease the size of the current rectangle.
+    shift + drag - Hold down shift and drag rectangles around.
