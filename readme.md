@@ -1,7 +1,6 @@
 # deep_tag
 ### Quickly create PASCAL/VOC annotations from video (.mp4) files.
-### Uses OpenCV trackers to automatically position rectangles around moving objects, you just
-### correct its mistakes.
+#### Uses **OpenCV** trackers to automatically position rectangles around moving objects, you just correct its mistakes.
 
 #### (c) Tony Di Croce, dicroce@gmail.com
 
