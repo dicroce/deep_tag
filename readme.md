@@ -5,7 +5,7 @@ deep_tag uses **OpenCV** trackers (CSRT, MIL or KCF) to automatically position r
 
 deep_tag has a ton of **keyboard shortcuts** to make correcting mistakes quick and painless.
 
-#### (c) Tony Di Croce, dicroce@gmail.com
+(c) Tony Di Croce, dicroce@gmail.com
 
 ![Image of deep_tag](https://github.com/dicroce/deep_tag/raw/main/screenshot1.png)
 
