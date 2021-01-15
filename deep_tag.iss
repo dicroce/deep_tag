@@ -35,6 +35,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "C:\dev\deep_tag\build\INSTALL_ROOT\bin\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 Source: "C:\dev\deep_tag\VC_redist.x64.exe"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "C:\dev\deep_tag\readme.txt"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -43,3 +44,5 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 [Run]
 Filename: "{app}\VC_redist.x64.exe"; Parameters: "/passive /silent /norestart"; WorkingDir: {app}; Flags: runminimized nowait; StatusMsg: Installing CRT...
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "notepad";  Parameters: {app}\readme.txt; Description: "View readme.txt"; Flags: postinstall runascurrentuser skipifsilent
+
