@@ -4,6 +4,12 @@
 
 ![Image of deep_tag](https://github.com/dicroce/deep_tag/raw/main/screenshot1.png)
 
+### Supported Systems
+1) Windows
+2) Linux
+
+Message me if you want to see a Mac release.
+
 ### Current Release
     https://github.com/dicroce/deep_tag/releases/download/1.0.0/deep_tag_setup.exe
 
