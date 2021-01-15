@@ -3,6 +3,9 @@ deep_tag
 
 (c) Tony Di Croce, dicroce@gmail.com
 
+Current Release
+    https://github.com/dicroce/deep_tag/releases/download/1.0.0/deep_tag_setup.exe
+
 How To Use
 
     1) Create a dataset project by picking a directory to put it in. Annotation and images will be stored in subdirectories.
