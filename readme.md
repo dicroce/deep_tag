@@ -3,7 +3,7 @@
 
 deep_tag uses **OpenCV** trackers (CSRT, MIL or KCF) to automatically position rectangles around moving objects, you just correct its mistakes.
 
-deep_tag has a ton of keyboard shortcuts to make correcting mistakes quick and painless.
+deep_tag has a ton of **keyboard shortcuts** to make correcting mistakes quick and painless.
 
 #### (c) Tony Di Croce, dicroce@gmail.com
 
