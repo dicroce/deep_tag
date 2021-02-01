@@ -10,10 +10,10 @@ import shutil
 import pandas as pd
 import xml.etree.ElementTree as et
 import tensorflow.compat.v1 as tf
-import label_map_util
 import argparse
 from PIL import Image
 from object_detection.utils import dataset_util
+from label_map_util import get_label_map_dict
 
 def parse_and_write_annotation(writer, annotation_path, images_dir, label_map):
     root_element = et.parse(annotation_path).getroot()
@@ -87,14 +87,17 @@ def main():
     parser = argparse.ArgumentParser(description='Convert VOC annotations to tensorflow tfrecord files.')
     parser.add_argument('-a','--annotations_dir', help='Directory containing VOC XML annotations.', required=True)
     parser.add_argument('-i','--images_dir', help='Directory contains JPEG images.', required=True)
+    parser.add_argument('-l','--label_map', help='PBTXT format mapping from text labels to integers.', required=True)
     args = vars(parser.parse_args())
 
-    annotations_path = args["abbb"]
-    images_path = parser.images_dir
+    annotations_path = args["annotations_dir"]
+    images_path = args["images_dir"]
+    label_map_path = args["label_map"]
     
     annotations = os.listdir(annotations_path)
     random.shuffle(annotations)
-    lm = {'person': 1, 'bird': 2, 'cat': 3, 'cow': 4, 'dog': 5, 'horse': 6, 'sheep': 7, 'aeroplane': 8, 'bicycle': 9, 'boat': 10, 'bus': 11, 'car': 12, 'motorbike': 13, 'train': 14, 'bottle': 15, 'chair': 16, 'diningtable': 17, 'pottedplant': 18, 'sofa': 19, 'tvmonitor': 20 }
+
+    lm = get_label_map_dict(label_map_path)
 
     train_writer = tf.python_io.TFRecordWriter('train.record')
     test_writer = tf.python_io.TFRecordWriter('test.record')
